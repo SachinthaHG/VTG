@@ -1,3 +1,5 @@
 *.jpg
 venv/
 dataset/
+*~
+*.thumbnail

@@ -20,7 +20,7 @@ class Connector:
             result = self.client.command(query)
         
     def retriveLandmarkDescription(self, predictions):
-        query = "SELECT Description FROM Landmark WHERE Name='" + predictions + "'"
+        query = "SELECT Description, Name, location.X, location.Y, @rid FROM Landmark WHERE Name='" + predictions + "'"
         results = self.client.command(query)
         return results
         
@@ -30,6 +30,6 @@ class Connector:
         return results
     
     def getLandmarkSuggestions(self, clusterNumber):
-        query = "SELECT Name, @rid, Description FROM Landmark WHERE Cluster_ID=" + str(clusterNumber)
+        query = "SELECT Name, @rid, Description, location.X, location.Y FROM Landmark WHERE Cluster_ID=" + str(clusterNumber)
         results = self.client.command(query)
         return results

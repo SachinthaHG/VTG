@@ -1,22 +1,18 @@
 import cv2
 import imutils 
 import numpy as np
-import os, sys
+import os
 from sklearn.svm import SVC
 from sklearn.externals import joblib
 from sklearn.preprocessing import StandardScaler
 from scipy.cluster.vq import kmeans,vq
-import pandas
-import sklearn_pandas
-from sklearn.decomposition import PCA
-from sklearn2pmml import sklearn2pmml
 import Image
 
 
 
 class CreateImageDataSet:
     def ExtractFeatures(self):
-        train_path = 'dataset/testing/test'
+        train_path = 'dataset/trained/clusters'
         training_names = os.listdir(train_path)
         
         for training_name in training_names:
@@ -27,8 +23,8 @@ class CreateImageDataSet:
             cluster_dir_names = os.listdir(full_train_path)
         
             for cluster_dir_name in cluster_dir_names:
-                dir = os.path.join(full_train_path, cluster_dir_name)
-                class_path = imutils.imlist(dir)
+                dirs = os.path.join(full_train_path, cluster_dir_name)
+                class_path = imutils.imlist(dirs)
                 image_paths+=class_path
                 image_classes+=[class_id]*len(class_path)
                 class_id+=1
@@ -41,17 +37,24 @@ class CreateImageDataSet:
             des_list = []
             
             for image_path in image_paths:
+#                 print image_path
                 im = cv2.imread(image_path)
                 kpts = fea_det.detect(im)
                 kpts, des = des_ext.compute(im, kpts)
+                print image_path
+                print des.shape
                 des_list.append((image_path, des))  
+                
                 
             # Stack all the descriptors vertically in a numpy array
             descriptors = des_list[0][1]
             for image_path, descriptor in des_list[1:]:
+#                 print image_path
                 descriptors = np.vstack((descriptors, descriptor)) 
                 
-            self.cluteringDescriptors(descriptors, image_paths, des_list, image_classes, training_name, cluster_dir_names)
+            print descriptors
+                
+#             self.cluteringDescriptors(descriptors, image_paths, des_list, image_classes, training_name, cluster_dir_names)
             
             
     def cluteringDescriptors(self, descriptors, image_paths, des_list, image_classes, training_name, cluster_dir_names):
@@ -69,16 +72,18 @@ class CreateImageDataSet:
         
         
         # Scaling the words
-        stdSlr = StandardScaler().fit(im_features)
+        scaler = StandardScaler()
+        stdSlr = scaler.fit(im_features)
         im_features = stdSlr.transform(im_features)
 
         # Train the Linear SVM
         clf = SVC(probability=True)
         clf.fit(im_features, np.array(image_classes))
         svm_file_name = str(training_name) + ".pkl"
-    
+        
         # Save the SVM
         joblib.dump((clf, cluster_dir_names, stdSlr, k, voc), svm_file_name, compress=9)
+#         joblib.dump(clf, "testing.pkl", compress=9)
         
 
     def compressImages(self):
@@ -106,4 +111,4 @@ class CreateImageDataSet:
             
 a = CreateImageDataSet()
 a.ExtractFeatures()
-a.compressImages()
+# a.compressImages()

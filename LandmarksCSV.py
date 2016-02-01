@@ -3,7 +3,7 @@ from Connector import Connector
 
 class LandmarksCSV:
     def CreateCSV(self):
-        writer=csv.writer(open("landmark_locations.csv",'wb'))
+        writer=csv.writer(open("landmark_locations.csv",'a+'))
         writer.writerow(['Landmark', 'Longitude', 'Latitiude'])
         connection = Connector()
         connection.makeConnection()

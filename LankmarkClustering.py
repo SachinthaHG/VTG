@@ -6,8 +6,6 @@ import os
 import shutil
 import errno
 from Connector import Connector
-from sklearn2pmml import sklearn2pmml
-import sklearn_pandas
 
 class LandmarkClustering:
     def make_sure_path_exists(self, path):
@@ -25,17 +23,17 @@ class LandmarkClustering:
         features_data = np.array(features_data)
         self.landmarks = np.array(self.landmarks)
            
-        km = KMeans(2, init='k-means++') # initialize
+        km = KMeans(1, init='k-means++') # initialize
           
         km = km.fit(features_data)
         self.clusterList  = km.predict(features_data)
         self.centers = km.cluster_centers_
         
-        joblib.dump((km), "locations.plk", compress=3)
+        joblib.dump((km), "locations.pkl", compress=9)
         
         
         self.updateLandmarkClass()
-#         self.moveImagesIntoClusterFolders()
+        self.moveImagesIntoClusterFolders()
      
     def getCentroids(self):
         return self.centers
@@ -49,7 +47,7 @@ class LandmarkClustering:
     def moveImagesIntoClusterFolders(self):     
         for x in range(len(self.clusterList)):
             currentPathName = "dataset/final_train/" + str(self.landmarks[x])
-            newPathName = "dataset/testing/test/Cluster_" + str(self.clusterList[x])
+            newPathName = "dataset/trained/clusters/Cluster_" + str(self.clusterList[x])
             self.make_sure_path_exists(newPathName)
             #os.rename(currentPathName, newPathName)
             shutil.move(currentPathName, newPathName)
